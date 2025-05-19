@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>TODOs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.png}">
+
+</head>
+<body>
+
+<div id="sidebar" class="sidebar" style="display:none">
+    <button onclick="closeSidebar()">Close &times;</button>
+    <a th:href="@{/}">Tareas</a>
+    <a th:href="@{/turnos}">Turnos</a>
+    <a th:href="@{/compras}">Compras</a>
+    <!-- Añade más enlaces si lo necesitas -->
+</div>
+<main>
+    <!-- Botón para abrir el menú -->
+    <button onclick="openSidebar()">&#9776; Menú</button>
+    <header>
+        <h1>Tareas</h1>
+    </header>
+
+    <h2>Tareas por hacer</h2>
+    <ul>
+        <li th:each="tarea : ${tareas}" class="tarea">
+            <form th:action="@{'/completar/' + ${tarea.id}}" method="post" style="display:inline;">
+                <input type="checkbox" onchange="this.form.submit()"/>
+            </form>
+            <div>
+                <span th:text="${tarea.descripcion}"></span>
+                <span th:if="${tarea.periodicidad != null}" class="periodicidad"
+                      th:text="' (Cada ' + ${tarea.periodicidad} + ' días)'"></span>
+            </div>
+            <form th:action="@{'/tarea/' + ${tarea.id} + '/encargado'}" method="post" style="display:inline;">
+                <select name="encargado" onchange="this.form.submit()" class="select-categoria">
+                    <option value="Ambos" th:selected="${tarea.encargado == null or tarea.encargado == 'Ambos'}">Ambos</option>
+                    <option value="Meli" th:selected="${tarea.encargado == 'Meli'}">Meli</option>
+                    <option value="Dani" th:selected="${tarea.encargado == 'Dani'}">Dani</option>
+                </select>
+            </form>
+        </li>
+    </ul>
+    <div class="paginacion">
+        <button th:if="${tareas.hasPrevious()}"
+                th:onclick="'location.href=\'/?page=' + ${tareas.number - 1} + '&pageCompleted=' + ${tareasCompletadas.number} + '\''">
+            Anterior
+        </button>
+        <span th:text="${tareas.number + 1} + ' / ' + ${tareas.totalPages}"></span>
+        <button th:if="${tareas.hasNext()}"
+                th:onclick="'location.href=\'/?page=' + ${tareas.number + 1} + '&pageCompleted=' + ${tareasCompletadas.number} + '\''">
+            Siguiente
+        </button>
+    </div>
+    <h4>Añade una nueva tarea:</h4>
+    <form th:action="@{/}" method="post" th:object="${nuevaTarea}" class="form">
+        <input type="text" th:field="*{descripcion}" placeholder="Nueva tarea" required/>
+        <input type="number" th:field="*{periodicidad}" min="1" placeholder="Periodicidad (días)">
+        <button type="submit">Añadir</button>
+    </form>
+    <h2 id="completadas">Tareas completadas</h2>
+    <ul>
+        <li th:each="tarea : ${tareasCompletadas}">
+            <form th:action="@{'/completar/' + ${tarea.id}}" method="post" style="display:inline;">
+                <input type="checkbox" checked onchange="this.form.submit()"/>
+                <span class="completada" th:text="${tarea.descripcion}"></span>
+                <span th:if="${tarea.periodicidad != null}" class="completada"
+                      th:text="' (Cada ' + ${tarea.periodicidad} + ' días)'"></span>
+            </form>
+            <span class="fecha-completada"
+                  th:text="'Completada el: ' + ${#temporals.format(tarea.fechaCompletada, 'dd/MM/yyyy HH:mm')}"></span>
+        </li>
+    </ul>
+    <div class="paginacion">
+        <button th:if="${tareasCompletadas.hasPrevious()}"
+                th:onclick="'location.href=\'/?page=' + ${tareas.number} + '&pageCompleted=' + ${tareasCompletadas.number - 1} + '#completadas\''">
+            Anterior
+        </button>
+        <span th:text="${tareasCompletadas.number + 1} + ' / ' + ${tareasCompletadas.totalPages}"></span>
+        <button th:if="${tareasCompletadas.hasNext()}"
+                th:onclick="'location.href=\'/?page=' + ${tareas.number} + '&pageCompleted=' + ${tareasCompletadas.number + 1} + '#completadas\''">
+            Siguiente
+        </button>
+    </div>
+</main>
+<script>
+    function openSidebar() {
+        document.getElementById("sidebar").style.display = "block";
+    }
+
+    function closeSidebar() {
+        document.getElementById("sidebar").style.display = "none";
+    }
+</script>
+</body>
+</html>

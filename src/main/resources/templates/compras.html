@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Compras</title>
+    <link rel="stylesheet" href="/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.png}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+<div id="sidebar" class="sidebar" style="display:none">
+    <button onclick="closeSidebar()">Close &times;</button>
+    <a th:href="@{/}">Tareas</a>
+    <a th:href="@{/turnos}">Turnos</a>
+    <a th:href="@{/compras}">Compras</a>
+    <!-- Añade más enlaces si lo necesitas -->
+</div>
+<main>
+    <button onclick="openSidebar()">&#9776; Menú</button>
+    <h1>Lista de la Compra</h1>
+    <!-- Lista de compras -->
+    <h2>Por comprar</h2>
+    <ul>
+        <li th:each="compra : ${compras}" th:if="${!compra.comprado}"
+            th:classappend="${compra.comprado} ? 'completada'" class="compra">
+            <form th:action="@{/compras/toggle/{id}(id=${compra.id})}" method="post"
+                  style="margin:0;display:flex;align-items:center;">
+                <input type="checkbox" name="comprado" th:checked="${compra.comprado}"
+                       onchange="this.form.submit()">
+            </form>
+            <div>
+                <b th:text="${compra.producto}">Producto</b>
+
+                <span th:if="${compra.categoria != null}">
+                            <span th:text="${compra.categoria}" class="categoria"></span>
+                        </span>
+            </div>
+            <span th:if="${compra.cantidad != null}" class="qty">
+                            <form th:action="@{/compras/incrementar/{id}(id=${compra.id})}" method="post"
+                                  style="display:inline;">
+                                <button type="submit" style="padding:6px 14px;"><i
+                                        class="fa-solid fa-plus"></i></button>
+                            </form>
+                            <span>
+                            <span th:text="${compra.cantidad}" style="margin:0 4px;"></span>
+                            <span th:text="${compra.unidad}"></span>
+                                </span>
+                            <form th:action="@{/compras/decrementar/{id}(id=${compra.id})}" method="post"
+                                  style="display:inline;">
+                                <button type="submit" style="padding:6px 14px;"><i
+                                        class="fa-solid fa-minus"></i></button>
+                            </form>
+
+
+
+                        <span th:if="${compra.nota != null}"> <i th:text="${compra.nota}"></i></span>
+                    </span>
+            <button class="btn-eliminar" th:formaction="@{/compras/eliminar/{id}(id=${compra.id})}"
+                    formmethod="post" type="submit" style="margin-left:auto;"><i class="fa-solid fa-trash"></i>
+            </button>
+
+        </li>
+    </ul>
+    <h2>Comprado</h2>
+    <ul>
+        <li th:each="compra : ${compras}" th:if="${compra.comprado}" th:classappend="${compra.comprado} ? 'completada'">
+            <form th:action="@{/compras/toggle/{id}(id=${compra.id})}" method="post"
+                  style="margin:0;display:flex;align-items:center;">
+                <input type="checkbox" name="comprado" th:checked="${compra.comprado}"
+                       onchange="this.form.submit()">
+            </form>
+            <span style="margin-left:10px;">
+                        <b th:text="${compra.producto}">Producto</b>
+                        <span th:if="${compra.categoria != null}">
+                            <span th:text="${compra.categoria}"></span>
+                        </span>
+                        <span th:if="${compra.nota != null}"> <i th:text="${compra.nota}"></i></span>
+                    </span>
+            <button class="btn-eliminar" th:formaction="@{/compras/eliminar/{id}(id=${compra.id})}"
+                    formmethod="post" type="submit" style="margin-left:auto;"><i class="fa-solid fa-trash"></i>
+            </button>
+        </li>
+    </ul>
+
+    <h2>Añade un nuevo producto</h2>
+    <!-- Formulario para añadir nuevo producto -->
+    <form th:action="@{/compras/agregar}" class="form" method="post">
+        <input type="text" name="producto" placeholder="Producto" required>
+        <input type="number" name="cantidad" min="1" value="1" style="width:60px;" required>
+        <input type="text" name="unidad" placeholder="Unidad (ej: kg, l)">
+        <select name="categoria" class="select-categoria" required>
+            <option value="" disabled selected>Selecciona categoría</option>
+            <option th:each="cat : ${categorias}" th:value="${cat}" th:text="${cat}"></option>
+        </select>
+        <input type="text" name="nota" placeholder="Nota">
+        <button type="submit">Añadir</button>
+    </form>
+
+
+</main>
+<script>
+    function openSidebar() {
+        document.getElementById("sidebar").style.display = "block";
+    }
+
+    function closeSidebar() {
+        document.getElementById("sidebar").style.display = "none";
+    }
+</script>
+</body>
+
+</html>

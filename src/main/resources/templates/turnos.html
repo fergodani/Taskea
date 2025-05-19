@@ -1,0 +1,124 @@
+<!-- src/main/resources/templates/turnos.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Turnos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.png}">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+</head>
+<body>
+<div id="sidebar" class="sidebar" style="display:none">
+    <button onclick="closeSidebar()">Close &times;</button>
+    <a th:href="@{/}">Tareas</a>
+    <a th:href="@{/turnos}">Turnos</a>
+    <a th:href="@{/compras}">Compras</a>
+    <!-- Añade más enlaces si lo necesitas -->
+</div>
+<main>
+    <!-- Botón para abrir el menú -->
+    <button onclick="openSidebar()">&#9776; Menú</button>
+    <h1>Turnos</h1>
+    <div id="calendario" style="max-width: 900px; margin: 40px auto;"></div>
+    <div>
+        <h2><span id="turno-1"></span> Turno 1 (<span th:text="${turno1.encargado}"></span>)</h2>
+        <ul>
+            <li class="tareas_turno" th:each="tarea : ${turno1.tareas}">
+                <span th:text="${tarea.descripcion}"></span>
+                <form th:action="@{'/turnos/tarea/' + ${tarea.id} + '/eliminar'}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-eliminar">Eliminar</button>
+                </form>
+            </li>
+        </ul>
+        <form th:action="@{'/turnos/1/tarea'}" method="post" th:object="${nuevaTarea}">
+            <input type="text" th:field="*{descripcion}" placeholder="Nueva tarea para turno 1" required/>
+            <button type="submit">Añadir</button>
+        </form>
+    </div>
+    <div style="margin-bottom: 20px;">
+        <h2><span id="turno-2"></span> Turno 2 (<span th:text="${turno2.encargado}"></span>)</h2>
+        <ul>
+            <li class="tareas_turno" th:each="tarea : ${turno2.tareas}">
+                <span th:text="${tarea.descripcion}"></span>
+                <form th:action="@{'/turnos/tarea/' + ${tarea.id} + '/eliminar'}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-eliminar">Eliminar</button>
+                </form>
+            </li>
+        </ul>
+        <form th:action="@{'/turnos/2/tarea'}" method="post" th:object="${nuevaTarea}">
+            <input type="text" th:field="*{descripcion}" placeholder="Nueva tarea para turno 2" required/>
+            <button type="submit">Añadir</button>
+        </form>
+    </div>
+    <!--
+    <form th:action="@{/turnos/intercambiar}" method="post">
+        <button type="submit">Intercambiar encargados</button>
+    </form>
+    -->
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Encargados iniciales desde Thymeleaf
+        //const encargado1 = '[[${turno1.encargado}]]';
+        //const encargado2 = '[[${turno2.encargado}]]';
+        const encargado1 = 'Meli';
+        const encargado2 = 'Dani';
+
+        function getISOWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.floor(((d - yearStart) / 86400000 + 1)/7);
+        }
+
+        // Función para obtener los encargados de la semana (rotando)
+        function getEncargadosPorSemana(date) {
+            const semanas = getISOWeekNumber(date);
+            // Si la semana es par, turno1=encargado1, turno2=encargado2; si es impar, al revés
+            if (semanas % 2 === 0) {
+                return { azul: encargado1, rojo: encargado2 };
+            } else {
+                return { azul: encargado2, rojo: encargado1 };
+            }
+        }
+
+        var calendarEl = document.getElementById('calendario');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            firstDay: 1,
+            initialView: 'dayGridMonth',
+            dayCellContent: function(arg) {
+                // arg.date es la fecha del día
+                const encargados = getEncargadosPorSemana(arg.date);
+                // HTML para los círculos y nombres
+                return {
+                    html:`
+                    <div style="display:flex;align-items:center;flex-direction:column;">
+                        <span>${arg.dayNumberText}</span>
+                        <div style="display:flex;gap:2px;align-items:center;">
+                            <span style="display:inline-block;width:12px;height:12px;background:#1976d2;border-radius:50%;margin-right:2px;"></span>
+                            <span style="font-size:0.7em;">${encargados.azul}</span>
+                        </div>
+                        <div style="display:flex;gap:2px;align-items:center;">
+                            <span style="display:inline-block;width:12px;height:12px;background:#e53935;border-radius:50%;margin-right:2px;"></span>
+                            <span style="font-size:0.7em;">${encargados.rojo}</span>
+                        </div>
+                    </div>
+                `
+            };
+            }
+        });
+        calendar.render();
+    });
+    function openSidebar() {
+        document.getElementById("sidebar").style.display = "block";
+    }
+
+    function closeSidebar() {
+        document.getElementById("sidebar").style.display = "none";
+    }
+</script>
+</body>
+</html>
