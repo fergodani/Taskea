@@ -1,0 +1,2 @@
+INSERT INTO `taskea`.`turno`(`id`,`encargado_actual`,`fecha_fin`,`fecha_inicio`,`nombre`,`encargado`,`numero`)VALUES(2,"Meli",null,null,"Turno 2","Meli",2);
+INSERT INTO `taskea`.`turno`(`id`,`encargado_actual`,`fecha_fin`,`fecha_inicio`,`nombre`,`encargado`,`numero`)VALUES(1,"Dani",null,null,"Turno 1","Dani",1);
